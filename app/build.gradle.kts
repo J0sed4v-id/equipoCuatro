@@ -7,6 +7,7 @@ android {
     namespace = "com.example.myapplication"
     compileSdk = 36
 
+
     defaultConfig {
         applicationId = "com.example.myapplication"
         minSdk = 24
@@ -17,6 +18,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -47,7 +51,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.biometric)
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation("com.airbnb.android:lottie:6.4.0")
     testImplementation(libs.junit)

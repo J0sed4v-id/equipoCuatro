@@ -12,6 +12,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
+
+
+        <activity
+            android:name=".AgregarProductoActivity"
+            android:exported="false" />
+
+        <!-- Pantalla principal (Home) -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+
+
+        <!-- Actividad principal de login -->
         <activity
             android:name=".ui.login.LoginActivity"
             android:exported="true">
