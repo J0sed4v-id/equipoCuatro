@@ -63,11 +63,19 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nombre del producto">
+                android:hint="Nombre del producto"
+                android:layout_marginTop="16dp"
+                app:boxStrokeColor="@color/purple_500"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxBackgroundMode="outline">
+
+
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etNombreProducto"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:textColorHint="@color/purple_700" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!--  Cantidad -->

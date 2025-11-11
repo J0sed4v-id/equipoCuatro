@@ -46,11 +46,13 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.biometric)
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation("com.airbnb.android:lottie:6.4.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.google.android.material:material:1.12.0")
+
+
 }

@@ -33,6 +33,7 @@ class AgregarProductoActivity : AppCompatActivity() {
 
 
             //validaciones
+
             var valido = true
 
             if (codigo.isEmpty()) {
