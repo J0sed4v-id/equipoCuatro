@@ -26,20 +26,50 @@ class AgregarProductoActivity : AppCompatActivity() {
 
         // Acción del botón que guarda el producto
         binding.btnGuardarProducto.setOnClickListener {
+            val codigo = binding.etCodigoProducto.text.toString()
             val nombre = binding.etNombreProducto.text.toString()
             val cantidad = binding.etCantidadProducto.text.toString()
             val precio = binding.etPrecioProducto.text.toString()
 
 
-            // Temporal: solo mostrar los valores ingresados (más adelante guardaremos en BD)
+            //validaciones
+            var valido = true
 
-            if (nombre.isNotEmpty() && cantidad.isNotEmpty() && precio.isNotEmpty()) {
-                // Mostrar mensaje temporal de éxito
-                Toast.makeText(this, "Producto guardado: $nombre", Toast.LENGTH_SHORT).show()
-                finish() // Regresa al Home
+            if (codigo.isEmpty()) {
+                binding.etCodigoProducto.error = "Ingresa un código"
+                valido = false
             } else {
-                // Avisar si faltan datos
-                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
+                binding.etCodigoProducto.error = null
+            }
+
+            if (nombre.isEmpty()) {
+                binding.etNombreProducto.error = "Ingresa el nombre"
+                valido = false
+            } else {
+                binding.etNombreProducto.error = null
+            }
+
+            if (cantidad.isEmpty()) {
+                binding.etCantidadProducto.error = "Ingresa la cantidad"
+                valido = false
+            } else {
+                binding.etCantidadProducto.error = null
+            }
+
+            if (precio.isEmpty()) {
+                binding.etPrecioProducto.error = "Ingresa el precio"
+                valido = false
+            } else {
+                binding.etPrecioProducto.error = null
+            }
+
+            // Si todo es válido, mostrar mensaje temporal y volver al Home
+            if (valido) {
+                Toast.makeText(this, "Producto guardado: $nombre", Toast.LENGTH_SHORT).show()
+                finish()
+            } else {
+                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
