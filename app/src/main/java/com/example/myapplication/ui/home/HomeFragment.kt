@@ -51,12 +51,7 @@ class HomeFragment : Fragment() {
         setupFAB() // Aseguramos que el FAB se configure
         observeViewModel()
     }
-    // ⭐ El resto de las funciones auxiliares se mantienen sin cambios,
-    // salvo la corrección en observeViewModel para el FAB.
 
-    /**
-     * Configura el comportamiento del botón de atrás (HU-3 C4).
-     */
     private fun setupBackButtonBehavior() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             // No dirige al login, sino que cierra la aplicación y envía al escritorio

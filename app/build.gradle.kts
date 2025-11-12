@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
+    id("com.google.devtools.ksp") version "1.9.23-1.0.19"
 }
 
 android {
@@ -62,5 +62,12 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+
+    val room_version = "2.6.1"
+
+    // Dependencias de Room
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 
 }
