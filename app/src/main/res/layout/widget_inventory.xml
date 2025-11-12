@@ -85,6 +85,7 @@
                 android:layout_height="24dp"
                 android:src="@drawable/ic_inventory_logo" />
 
+            <!-- Texto Inventory -->
             <TextView
                 android:id="@+id/tvAppName"
                 android:layout_width="wrap_content"
