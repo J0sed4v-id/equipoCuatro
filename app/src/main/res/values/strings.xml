@@ -1,4 +1,10 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Widget Inventory</string>
     <string name="inventory">Inventory</string>
+    <string name="peso">$</string>
+    <string name="saldo">saldo</string>
+    <string name="cuanto_tengo_de_inventario">¿Cuanto tengo de inventario?</string>
+    <string name="toggle_balance_visibility">Mostrar u ocultar saldo del inventario</string>
+    <string name="app_logo">Logo de la aplicación Inventory</string>
+    <string name="manage_inventory">Gestionar inventario</string>
 </resources>
