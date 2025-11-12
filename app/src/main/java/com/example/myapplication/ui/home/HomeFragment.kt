@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -25,7 +26,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var productAdapter: ProductAdapter
 
-    // Inicialización del ViewModel con Factory y Repository
+    // ViewModel con Factory y Repository
     private val viewModel: HomeViewModel by viewModels {
         val db = AppDatabase.getDatabase(requireContext())
         val repository = ProductRepository(db.productDao())
@@ -41,43 +42,52 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
-    // ⭐ FUNCIÓN CORREGIDA: SOLUCIÓN AL ERROR DE DUPLICIDAD
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupToolbar()
         setupBackButtonBehavior()
         setupRecyclerView()
-        setupFAB() // Aseguramos que el FAB se configure
+        setupFAB()
         observeViewModel()
     }
 
+    // 🔙 Evitar volver al login con el botón atrás
     private fun setupBackButtonBehavior() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            // No dirige al login, sino que cierra la aplicación y envía al escritorio
-            requireActivity().finishAffinity()
+            requireActivity().finishAffinity() // Cierra completamente la app
         }
     }
 
-
+    // ⚙️ Toolbar con botón de cerrar sesión
     private fun setupToolbar() {
         binding.toolbarHome.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_logout -> {
-                    // Lógica para cerrar sesión
-                    Toast.makeText(requireContext(), "Cerrando sesión...", Toast.LENGTH_SHORT)
-                        .show()
+                    // 🔒 Cerrar sesión y borrar SharedPreferences
+                    val sharedPref = requireActivity().getSharedPreferences(
+                        "UserSession",
+                        AppCompatActivity.MODE_PRIVATE
+                    )
+                    val editor = sharedPref.edit()
+                    editor.clear() // Borra la sesión guardada
+                    editor.apply()
+
+                    Toast.makeText(requireContext(), "Cerrando sesión...", Toast.LENGTH_SHORT).show()
+
+                    // 🔁 Volver al Login y limpiar historial
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     true
                 }
+
                 else -> false
             }
         }
     }
 
-
+    // 🧾 Configuración del RecyclerView
     private fun setupRecyclerView() {
         productAdapter = ProductAdapter()
         binding.rvProductos.apply {
@@ -86,32 +96,26 @@ class HomeFragment : Fragment() {
         }
     }
 
-
+    // ➕ Botón flotante para agregar producto
     private fun setupFAB() {
-        // Aseguramos que la visibilidad inicial sea VISIBLE.
-        binding.fabAgregarProducto.visibility = View.VISIBLE
-
-        binding.fabAgregarProducto.setOnClickListener {
-            // Navegación al fragmento AgregarProductoFragment
-            findNavController().navigate(R.id.action_homeFragment_to_agregarProductoFragment)
+        binding.fabAgregarProducto.apply {
+            visibility = View.VISIBLE
+            setOnClickListener {
+                findNavController().navigate(R.id.action_homeFragment_to_agregarProductoFragment)
+            }
         }
     }
 
+    // 👀 Observadores del ViewModel
     private fun observeViewModel() {
         viewModel.products.observe(viewLifecycleOwner) { products ->
             productAdapter.updateList(products)
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.progressBar.isVisible = isLoading
+            binding.progressCircular.isVisible = isLoading
             binding.rvProductos.isVisible = !isLoading
-
-            // CORRECCIÓN/AJUSTE: Aseguramos que el FAB solo esté visible cuando no esté cargando
-            if (isLoading) {
-                binding.fabAgregarProducto.isVisible = false
-            } else {
-                binding.fabAgregarProducto.isVisible = true
-            }
+            binding.fabAgregarProducto.isVisible = !isLoading
         }
     }
 
@@ -120,20 +124,5 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 }
-//    private fun observeViewModel() {
-//        viewModel.products.observe(viewLifecycleOwner) { products ->
-//            productAdapter.updateList(products)
-//        }
-//
-//        // Mostrar/Ocultar Progress Bar
-//        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-//            binding.progressBar.isVisible = isLoading
-//            binding.rvProductos.isVisible = !isLoading
-//        }
-//    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//}
+
 
