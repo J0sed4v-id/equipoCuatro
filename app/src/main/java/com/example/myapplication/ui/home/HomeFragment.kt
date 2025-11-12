@@ -52,14 +52,14 @@ class HomeFragment : Fragment() {
         observeViewModel()
     }
 
-    // 🔙 Evitar volver al login con el botón atrás
+    //Evitar volver al login con el botón atrás
     private fun setupBackButtonBehavior() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             requireActivity().finishAffinity() // Cierra completamente la app
         }
     }
 
-    // ⚙️ Toolbar con botón de cerrar sesión
+    // Toolbar con botón de cerrar sesión
     private fun setupToolbar() {
         binding.toolbarHome.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -87,7 +87,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // 🧾 Configuración del RecyclerView
+    // Configuración del RecyclerView
     private fun setupRecyclerView() {
         productAdapter = ProductAdapter()
         binding.rvProductos.apply {
@@ -96,7 +96,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // ➕ Botón flotante para agregar producto
+    // Botón flotante para agregar producto
     private fun setupFAB() {
         binding.fabAgregarProducto.apply {
             visibility = View.VISIBLE
@@ -106,7 +106,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // 👀 Observadores del ViewModel
+    // Observadores del ViewModel
     private fun observeViewModel() {
         viewModel.products.observe(viewLifecycleOwner) { products ->
             productAdapter.updateList(products)

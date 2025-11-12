@@ -27,14 +27,14 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".AgregarProductoActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".AgregarProductoActivity"-->
+<!--            android:exported="false" />-->
 
         <!-- Pantalla principal (Home) -->
         <activity
             android:name=".MainActivity"
-            android:exported="true" />
+            android:exported="false" />
 
     </application>
 
