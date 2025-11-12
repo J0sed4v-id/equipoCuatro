@@ -26,19 +26,20 @@
             android:src="@drawable/eye"
             app:tint="@android:color/white" />
 
-        <!-- Texto "¿Cuánto tengo de inventario?" (parte superior izquierda) -->
+        <!-- Texto "¿Cuánto tengo de inventario?" -->
         <TextView
             android:id="@+id/tvQuestion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_marginStart="140dp"
+            android:layout_marginTop="0dp"
             android:text="@string/cuanto_tengo_de_inventario"
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- Saldo del inventario (centro) -->
         <LinearLayout
             android:id="@+id/balanceContainer"
             android:layout_width="wrap_content"
