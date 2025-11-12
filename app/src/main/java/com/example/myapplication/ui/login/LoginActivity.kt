@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -88,11 +89,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToHome() {
-        // Aquí va la lógica para navegar a tu Home Inventory
-        // Ejemplo:
-        // val intent = Intent(this, HomeActivity::class.java)
-        // startActivity(intent)
-        // finish()
+        /*val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish() // Cierra el LoginActivity para que no vuelva atrás*/
 
         showMessage("Navegando a Home Inventory...")
     }
