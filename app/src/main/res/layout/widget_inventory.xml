@@ -15,7 +15,7 @@
         android:minHeight="120dp"
         android:padding="12dp">
 
-        <!-- Ícono del ojo (parte superior derecha) -->
+        <!-- Ícono de ojo abierto -->
         <ImageView
             android:id="@+id/ivEye"
             android:layout_width="20dp"
