@@ -9,9 +9,8 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.myapplication.MyApplication
 import com.example.myapplication.R
-import com.example.myapplication.data.AppDatabase
-import com.example.myapplication.data.ProductRepository
 import com.example.myapplication.databinding.FragmentAgregarProductoBinding
 import com.example.myapplication.ui.ViewModelFactory
 
@@ -22,9 +21,7 @@ class AgregarProductoFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AgregarProductoViewModel by viewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repository = ProductRepository(db.productDao())
-        ViewModelFactory(repository)
+        ViewModelFactory(requireActivity().application as MyApplication)
     }
 
     override fun onCreateView(
