@@ -7,11 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentHomeBinding
-import androidx.recyclerview.widget.LinearLayoutManager
-
-
 
 class HomeFragment : Fragment() {
 
@@ -23,7 +21,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return binding.root          //
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,7 +35,7 @@ class HomeFragment : Fragment() {
     private fun configurarToolbar() {
         binding.toolbarHome.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.action_logout -> {  //
+                R.id.action_logout -> {
                     Toast.makeText(requireContext(), "Cerrar sesión", Toast.LENGTH_SHORT).show()
                     true
                 }
@@ -61,8 +59,6 @@ class HomeFragment : Fragment() {
         )
 
         binding.rvProductos.layoutManager = LinearLayoutManager(requireContext())
-
         binding.rvProductos.adapter = ProductAdapter(productos)
     }
 }
-
