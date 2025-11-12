@@ -49,22 +49,13 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/tvCurrency"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/peso"
-                android:textColor="@android:color/white"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
                 android:id="@+id/tvBalance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="@string/saldo"
+                android:layout_marginStart="170dp"
+                android:text="$ * * * *"
                 android:textColor="@android:color/white"
-                android:textSize="18sp"
+                android:textSize="35sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
