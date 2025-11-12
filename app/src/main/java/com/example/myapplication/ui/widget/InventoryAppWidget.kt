@@ -5,14 +5,22 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.widget.RemoteViews
 import com.example.myapplication.MyApplication
 import com.example.myapplication.R
-import com.example.myapplication.ui.ViewModelFactory
-import com.example.myapplication.ui.home.InventoryWidgetViewModel
 import com.example.myapplication.ui.login.LoginActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 class InventoryAppWidget : AppWidgetProvider() {
+
+    private val PREFS_NAME = "com.example.myapplication.ui.widget.InventoryAppWidget"
+    private val PREF_PREFIX_KEY = "balance_visible_"
 
     override fun onUpdate(
         context: Context,
@@ -31,24 +39,24 @@ class InventoryAppWidget : AppWidgetProvider() {
     ) {
         val views = RemoteViews(context.packageName, R.layout.app_widget_inventory)
         val application = context.applicationContext as MyApplication
-        val viewModel = ViewModelFactory(application).create(InventoryWidgetViewModel::class.java)
+        val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+        val isBalanceVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
 
-        viewModel.inventoryBalance.observeForever {
-            views.setTextViewText(R.id.tvBalance, it)
-            appWidgetManager.updateAppWidget(appWidgetId, views)
-        }
+        GlobalScope.launch(Dispatchers.IO) {
+            val products = application.repository.allProducts.first()
+            val totalBalance = products.sumOf { it.precio * it.cantidad }
+            val formattedBalance = formatBalance(totalBalance)
 
-        viewModel.isBalanceVisible.observeForever { isVisible ->
-            val displayBalance = viewModel.getDisplayBalance()
+            val displayBalance = if (isBalanceVisible) formattedBalance else "$ ****"
+            val eyeIcon = if (isBalanceVisible) R.drawable.ic_closed_eye else R.drawable.eye
+
             views.setTextViewText(R.id.tvBalance, displayBalance)
-            val eyeIcon = if (isVisible) R.drawable.ic_closed_eye else R.drawable.eye
             views.setImageViewResource(R.id.ivEye, eyeIcon)
+
+            setupClickActions(views, context, appWidgetId)
+
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
-
-        setupClickActions(views, context, appWidgetId)
-
-        appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
     private fun setupClickActions(
@@ -69,7 +77,7 @@ class InventoryAppWidget : AppWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.ivEye, togglePendingIntent)
 
-        // Acción para el botón "Gestionar Inventario" - abre la LoginActivity
+        // Acción para el botón "Gestionar Inventario"
         val loginIntent = Intent(context, LoginActivity::class.java)
         val loginPendingIntent = PendingIntent.getActivity(
             context,
@@ -78,20 +86,28 @@ class InventoryAppWidget : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.btnManageInventory, loginPendingIntent)
-        views.setOnClickPendingIntent(R.id.iconAdd, loginPendingIntent)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
 
         if (intent.action == TOGGLE_BALANCE_ACTION) {
-            val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
-            if (appWidgetId != -1) {
-                val application = context.applicationContext as MyApplication
-                val viewModel = ViewModelFactory(application).create(InventoryWidgetViewModel::class.java)
-                viewModel.toggleBalanceVisibility()
+            val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+                val isVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
+                val editor = prefs.edit()
+                editor.putBoolean(PREF_PREFIX_KEY + appWidgetId, !isVisible)
+                editor.apply()
+
+                updateAppWidget(context, AppWidgetManager.getInstance(context), appWidgetId)
             }
         }
+    }
+
+    private fun formatBalance(balance: Double): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
+        return format.format(balance).replace("COP", "$")
     }
 
     companion object {
