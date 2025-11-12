@@ -1,14 +1,26 @@
-package com.example.myapplication.widget
+package com.example.myapplication.ui.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.widget.RemoteViews
+import com.example.myapplication.MyApplication
 import com.example.myapplication.R
+import com.example.myapplication.ui.login.LoginActivity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 class InventoryAppWidget : AppWidgetProvider() {
+
+    private val PREFS_NAME = "com.example.myapplication.ui.widget.InventoryAppWidget"
+    private val PREF_PREFIX_KEY = "balance_visible_"
 
     override fun onUpdate(
         context: Context,
@@ -26,30 +38,24 @@ class InventoryAppWidget : AppWidgetProvider() {
         appWidgetId: Int
     ) {
         val views = RemoteViews(context.packageName, R.layout.app_widget_inventory)
+        val application = context.applicationContext as MyApplication
+        val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+        val isBalanceVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
 
-        // Configurar estado inicial
-        setupInitialState(views, context, appWidgetId)
+        GlobalScope.launch(Dispatchers.IO) {
+            val products = application.repository.allProducts.first()
+            val totalBalance = products.sumOf { it.precio * it.cantidad }
+            val formattedBalance = formatBalance(totalBalance)
 
-        // Configurar clics
-        setupClickActions(views, context, appWidgetId)
+            val displayBalance = if (isBalanceVisible) formattedBalance else "$ ****"
+            val eyeIcon = if (isBalanceVisible) R.drawable.ic_closed_eye else R.drawable.eye
 
-        appWidgetManager.updateAppWidget(appWidgetId, views)
-    }
+            views.setTextViewText(R.id.tvBalance, displayBalance)
+            views.setImageViewResource(R.id.ivEye, eyeIcon)
 
-    private fun setupInitialState(
-        views: RemoteViews,
-        context: Context,
-        appWidgetId: Int
-    ) {
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val isBalanceVisible = prefs.getBoolean("balance_visible_$appWidgetId", false)
+            setupClickActions(views, context, appWidgetId)
 
-        if (isBalanceVisible) {
-            views.setTextViewText(R.id.tvBalance, "$ 326.000,00")
-            views.setImageViewResource(R.id.ivEye, R.drawable.ic_closed_eye)
-        } else {
-            views.setTextViewText(R.id.tvBalance, "$ * * * *")
-            views.setImageViewResource(R.id.ivEye, R.drawable.eye)
+            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
 
@@ -71,47 +77,37 @@ class InventoryAppWidget : AppWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.ivEye, togglePendingIntent)
 
-        // Acción para el botón "Gestionar Inventario" - abre la app
-        val appIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val appPendingIntent = PendingIntent.getActivity(
+        // Acción para el botón "Gestionar Inventario"
+        val loginIntent = Intent(context, LoginActivity::class.java)
+        val loginPendingIntent = PendingIntent.getActivity(
             context,
-            appWidgetId + 1000,
-            appIntent,
+            appWidgetId + 1000, // unique request code
+            loginIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        views.setOnClickPendingIntent(R.id.btnManageInventory, appPendingIntent)
+        views.setOnClickPendingIntent(R.id.btnManageInventory, loginPendingIntent)
     }
 
-    override fun onReceive(context: Context?, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
 
-        if (intent?.action == TOGGLE_BALANCE_ACTION) {
-            val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
-            if (appWidgetId != -1 && context != null) {
-                toggleBalanceVisibility(context, AppWidgetManager.getInstance(context), appWidgetId)
+        if (intent.action == TOGGLE_BALANCE_ACTION) {
+            val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+                val isVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
+                val editor = prefs.edit()
+                editor.putBoolean(PREF_PREFIX_KEY + appWidgetId, !isVisible)
+                editor.apply()
+
+                updateAppWidget(context, AppWidgetManager.getInstance(context), appWidgetId)
             }
         }
     }
 
-    private fun toggleBalanceVisibility(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetId: Int
-    ) {
-        val views = RemoteViews(context.packageName, R.layout.app_widget_inventory)
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val isBalanceVisible = !prefs.getBoolean("balance_visible_$appWidgetId", false)
-
-        if (isBalanceVisible) {
-            views.setTextViewText(R.id.tvBalance, "$ 326.000,00")
-            views.setImageViewResource(R.id.ivEye, R.drawable.ic_closed_eye)
-        } else {
-            views.setTextViewText(R.id.tvBalance, "$ * * * *")
-            views.setImageViewResource(R.id.ivEye, R.drawable.eye)
-        }
-
-        prefs.edit().putBoolean("balance_visible_$appWidgetId", isBalanceVisible).apply()
-        appWidgetManager.updateAppWidget(appWidgetId, views)
+    private fun formatBalance(balance: Double): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
+        return format.format(balance).replace("COP", "$")
     }
 
     companion object {
