@@ -41,6 +41,7 @@ class HomeFragment : Fragment() {
                     Toast.makeText(requireContext(), "Cerrar sesión", Toast.LENGTH_SHORT).show()
                     true
                 }
+
                 else -> false
             }
         }
@@ -53,16 +54,26 @@ class HomeFragment : Fragment() {
     }
 
     private fun configurarLista() {
-        val productos = listOf(
-            Product("001", "Cuaderno"),
-            Product("002", "Bolígrafo"),
-            Product("003", "Cartulina"),
-            Product("004", "Regla")
-        )
 
-        binding.rvProductos.layoutManager = LinearLayoutManager(requireContext())
+        binding.progressCircular.visibility = View.VISIBLE
+        binding.rvProductos.visibility = View.GONE
 
-        binding.rvProductos.adapter = ProductAdapter(productos)
+
+        binding.rvProductos.postDelayed({
+            val productos = listOf(
+                Product("001", "Cuaderno"),
+                Product("002", "Bolígrafo"),
+                Product("003", "Cartulina"),
+                Product("004", "Regla")
+            )
+
+            binding.rvProductos.layoutManager = LinearLayoutManager(requireContext())
+
+            binding.rvProductos.adapter = ProductAdapter(productos)
+
+
+            binding.progressCircular.visibility = View.GONE
+            binding.rvProductos.visibility = View.VISIBLE
+        }, 2000) // 2000 milisegundos = 2 segundos
     }
 }
-
