@@ -13,14 +13,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-
+import com.example.myapplication.MyApplication
 import com.example.myapplication.R
-import com.example.myapplication.data.AppDatabase
-import com.example.myapplication.data.ProductRepository
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.ui.ViewModelFactory
 import com.example.myapplication.ui.login.LoginActivity
-
 
 class HomeFragment : Fragment() {
 
@@ -30,9 +27,7 @@ class HomeFragment : Fragment() {
 
     // ViewModel con Factory y Repository
     private val viewModel: HomeViewModel by viewModels {
-        val db = AppDatabase.getDatabase(requireContext())
-        val repository = ProductRepository(db.productDao())
-        ViewModelFactory(repository)
+        ViewModelFactory(requireActivity().application as MyApplication)
     }
 
     override fun onCreateView(
@@ -93,7 +88,10 @@ class HomeFragment : Fragment() {
 
     // Configuración del RecyclerView
     private fun setupRecyclerView() {
-        productAdapter = ProductAdapter()
+        productAdapter = ProductAdapter { product ->
+            val action = HomeFragmentDirections.actionHomeFragmentToProductDetailFragment(product.codigo.toInt())
+            findNavController().navigate(action)
+        }
         binding.rvProductos.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = productAdapter
@@ -129,5 +127,3 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 }
-
-

@@ -3,12 +3,12 @@ package com.example.myapplication.ui.home
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.R
 import com.example.myapplication.databinding.ItemProductBinding
 import com.example.myapplication.domain.Product
 
 class ProductAdapter(
-    private var productos: List<Product> = emptyList()
+    private var productos: List<Product> = emptyList(),
+    private val onProductClicked: (Product) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     fun updateList(newList: List<Product>) {
@@ -24,6 +24,10 @@ class ProductAdapter(
             binding.tvId.text = "ID: ${p.codigo}"
             // Precio con formato
             binding.tvPrecio.text = p.formattedPrice()
+
+            binding.root.setOnClickListener {
+                onProductClicked(p)
+            }
         }
     }
 
