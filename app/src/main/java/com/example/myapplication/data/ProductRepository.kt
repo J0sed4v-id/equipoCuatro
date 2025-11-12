@@ -14,4 +14,16 @@ class ProductRepository(private val productDao: ProductDao) {
     suspend fun insert(product: Product) {
         productDao.insertProduct(product.toEntity())
     }
+
+    fun getProductById(id: String): Flow<Product> {
+        return productDao.getProductById(id).map { it.toDomain() }
+    }
+
+    suspend fun update(product: Product) {
+        productDao.updateProduct(product.toEntity())
+    }
+
+    suspend fun deleteById(id: String) {
+        productDao.deleteProductById(id)
+    }
 }
