@@ -19,8 +19,19 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
 
+        // Revisar si ya hay sesión activa
+        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
+        val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
+
+        if (isLoggedIn) {
+            // Si ya hay sesión guardada → saltar el login
+            navigateToHome()
+            finish()
+            return
+        }
+
+        setContentView(R.layout.activity_login)
         setupBiometricAuthentication()
         setupFingerprintAnimation()
     }
@@ -38,7 +49,16 @@ class LoginActivity : AppCompatActivity() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     showMessage("¡Autenticación exitosa!")
-                    navigateToHome() // ✅ Esto ahora funcionará
+
+                    // ✅ Guardar sesión
+                    val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
+                    with(sharedPref.edit()) {
+                        putBoolean("isLoggedIn", true)
+                        apply()
+                    }
+
+                    // ✅ Ir al Home
+                    navigateToHome()
                 }
 
                 override fun onAuthenticationFailed() {
@@ -48,8 +68,8 @@ class LoginActivity : AppCompatActivity() {
             })
 
         promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Autenticación con Biometría")
-            .setSubtitle("Ingrese su huella digital")
+            .setTitle("Autenticación con huella digital")
+            .setSubtitle("Usa tu huella para acceder a la app")
             .setNegativeButtonText("Cancelar")
             .build()
     }
@@ -68,7 +88,7 @@ class LoginActivity : AppCompatActivity() {
                 biometricPrompt.authenticate(promptInfo)
             }
             else -> {
-                showMessage("Biometría no disponible")
+                showMessage("La autenticación biométrica no está disponible")
             }
         }
     }
@@ -76,7 +96,7 @@ class LoginActivity : AppCompatActivity() {
     private fun navigateToHome() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish() // Esto evita que el usuario vuelva al login con el botón "back"
+        finish() // Evita que el usuario vuelva al login con el botón atrás
     }
 
     private fun showMessage(message: String) {
