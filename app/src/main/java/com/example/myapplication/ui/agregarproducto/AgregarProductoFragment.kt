@@ -14,6 +14,7 @@ import com.example.myapplication.data.AppDatabase
 import com.example.myapplication.data.ProductRepository
 import com.example.myapplication.databinding.FragmentAgregarProductoBinding
 import com.example.myapplication.ui.ViewModelFactory
+import androidx.core.content.ContextCompat
 
 
 class AgregarProductoFragment : Fragment() {
@@ -45,6 +46,8 @@ class AgregarProductoFragment : Fragment() {
     }
 
     private fun setupToolbar() {
+        binding.toolbarAgregarProducto.title = "Agregar producto"
+        binding.toolbarAgregarProducto.setTitleTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
         binding.toolbarAgregarProducto.setNavigationOnClickListener {
             findNavController().navigateUp()
         }

@@ -14,7 +14,7 @@
         android:layout_alignParentEnd="true"
         android:contentDescription="@string/toggle_balance_visibility"
         android:src="@drawable/eye"
-        android:tint="@android:color/white" />
+        android:tint="@android:color/white"/>
 
     <!-- Texto "¿Cuánto tengo de inventario?" -->
     <TextView
