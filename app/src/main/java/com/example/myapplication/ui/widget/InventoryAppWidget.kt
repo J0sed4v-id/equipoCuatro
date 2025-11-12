@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.widget.RemoteViews
 import com.example.myapplication.MyApplication
 import com.example.myapplication.R
@@ -53,17 +54,23 @@ class InventoryAppWidget : AppWidgetProvider() {
             views.setTextViewText(R.id.tvBalance, displayBalance)
             views.setImageViewResource(R.id.ivEye, eyeIcon)
 
-            setupClickActions(views, context, appWidgetId)
+            setupClickActions(context, appWidgetId, views)
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
 
     private fun setupClickActions(
-        views: RemoteViews,
         context: Context,
-        appWidgetId: Int
+        appWidgetId: Int,
+        views: RemoteViews
     ) {
+        val pendingIntentFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_IMMUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
         // Acción para el ícono del ojo
         val toggleIntent = Intent(context, InventoryAppWidget::class.java).apply {
             action = TOGGLE_BALANCE_ACTION
@@ -73,7 +80,7 @@ class InventoryAppWidget : AppWidgetProvider() {
             context,
             appWidgetId,
             toggleIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            pendingIntentFlag
         )
         views.setOnClickPendingIntent(R.id.ivEye, togglePendingIntent)
 
@@ -83,7 +90,7 @@ class InventoryAppWidget : AppWidgetProvider() {
             context,
             appWidgetId + 1000, // unique request code
             loginIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            pendingIntentFlag
         )
         views.setOnClickPendingIntent(R.id.btnManageInventory, loginPendingIntent)
     }
