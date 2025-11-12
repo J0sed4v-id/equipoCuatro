@@ -15,6 +15,7 @@ import com.example.myapplication.data.ProductRepository
 import com.example.myapplication.databinding.FragmentAgregarProductoBinding
 import com.example.myapplication.ui.ViewModelFactory
 
+
 class AgregarProductoFragment : Fragment() {
 
     private var _binding: FragmentAgregarProductoBinding? = null
@@ -93,6 +94,7 @@ class AgregarProductoFragment : Fragment() {
                 null -> {
                     // No hacer nada
                 }
+
             }
         }
     }

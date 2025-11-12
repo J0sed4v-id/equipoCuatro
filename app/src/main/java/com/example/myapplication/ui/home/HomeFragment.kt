@@ -13,12 +13,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+
 import com.example.myapplication.R
 import com.example.myapplication.data.AppDatabase
 import com.example.myapplication.data.ProductRepository
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.ui.ViewModelFactory
 import com.example.myapplication.ui.login.LoginActivity
+
 
 class HomeFragment : Fragment() {
 
@@ -45,6 +47,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         setupToolbar()
         setupBackButtonBehavior()
         setupRecyclerView()
@@ -61,6 +64,7 @@ class HomeFragment : Fragment() {
 
     // Toolbar con botón de cerrar sesión
     private fun setupToolbar() {
+
         binding.toolbarHome.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_logout -> {
@@ -104,6 +108,7 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.action_homeFragment_to_agregarProductoFragment)
             }
         }
+
     }
 
     // Observadores del ViewModel
