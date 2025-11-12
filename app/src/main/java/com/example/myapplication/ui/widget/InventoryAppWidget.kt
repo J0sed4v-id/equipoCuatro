@@ -1,4 +1,4 @@
-package com.example.myapplication.widget
+package com.example.myapplication.ui.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -6,7 +6,11 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
+import com.example.myapplication.MyApplication
 import com.example.myapplication.R
+import com.example.myapplication.ui.ViewModelFactory
+import com.example.myapplication.ui.home.InventoryWidgetViewModel
+import com.example.myapplication.ui.login.LoginActivity
 
 class InventoryAppWidget : AppWidgetProvider() {
 
@@ -26,31 +30,25 @@ class InventoryAppWidget : AppWidgetProvider() {
         appWidgetId: Int
     ) {
         val views = RemoteViews(context.packageName, R.layout.app_widget_inventory)
+        val application = context.applicationContext as MyApplication
+        val viewModel = ViewModelFactory(application).create(InventoryWidgetViewModel::class.java)
 
-        // Configurar estado inicial
-        setupInitialState(views, context, appWidgetId)
+        viewModel.inventoryBalance.observeForever {
+            views.setTextViewText(R.id.tvBalance, it)
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
 
-        // Configurar clics
+        viewModel.isBalanceVisible.observeForever { isVisible ->
+            val displayBalance = viewModel.getDisplayBalance()
+            views.setTextViewText(R.id.tvBalance, displayBalance)
+            val eyeIcon = if (isVisible) R.drawable.ic_closed_eye else R.drawable.eye
+            views.setImageViewResource(R.id.ivEye, eyeIcon)
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
+
         setupClickActions(views, context, appWidgetId)
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
-    }
-
-    private fun setupInitialState(
-        views: RemoteViews,
-        context: Context,
-        appWidgetId: Int
-    ) {
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val isBalanceVisible = prefs.getBoolean("balance_visible_$appWidgetId", false)
-
-        if (isBalanceVisible) {
-            views.setTextViewText(R.id.tvBalance, "$ 326.000,00")
-            views.setImageViewResource(R.id.ivEye, R.drawable.ic_closed_eye)
-        } else {
-            views.setTextViewText(R.id.tvBalance, "$ * * * *")
-            views.setImageViewResource(R.id.ivEye, R.drawable.eye)
-        }
     }
 
     private fun setupClickActions(
@@ -71,47 +69,29 @@ class InventoryAppWidget : AppWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.ivEye, togglePendingIntent)
 
-        // Acción para el botón "Gestionar Inventario" - abre la app
-        val appIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        val appPendingIntent = PendingIntent.getActivity(
+        // Acción para el botón "Gestionar Inventario" - abre la LoginActivity
+        val loginIntent = Intent(context, LoginActivity::class.java)
+        val loginPendingIntent = PendingIntent.getActivity(
             context,
-            appWidgetId + 1000,
-            appIntent,
+            appWidgetId + 1000, // unique request code
+            loginIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        views.setOnClickPendingIntent(R.id.btnManageInventory, appPendingIntent)
+        views.setOnClickPendingIntent(R.id.btnManageInventory, loginPendingIntent)
+        views.setOnClickPendingIntent(R.id.iconAdd, loginPendingIntent)
     }
 
-    override fun onReceive(context: Context?, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
 
-        if (intent?.action == TOGGLE_BALANCE_ACTION) {
+        if (intent.action == TOGGLE_BALANCE_ACTION) {
             val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
-            if (appWidgetId != -1 && context != null) {
-                toggleBalanceVisibility(context, AppWidgetManager.getInstance(context), appWidgetId)
+            if (appWidgetId != -1) {
+                val application = context.applicationContext as MyApplication
+                val viewModel = ViewModelFactory(application).create(InventoryWidgetViewModel::class.java)
+                viewModel.toggleBalanceVisibility()
             }
         }
-    }
-
-    private fun toggleBalanceVisibility(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetId: Int
-    ) {
-        val views = RemoteViews(context.packageName, R.layout.app_widget_inventory)
-        val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val isBalanceVisible = !prefs.getBoolean("balance_visible_$appWidgetId", false)
-
-        if (isBalanceVisible) {
-            views.setTextViewText(R.id.tvBalance, "$ 326.000,00")
-            views.setImageViewResource(R.id.ivEye, R.drawable.ic_closed_eye)
-        } else {
-            views.setTextViewText(R.id.tvBalance, "$ * * * *")
-            views.setImageViewResource(R.id.ivEye, R.drawable.eye)
-        }
-
-        prefs.edit().putBoolean("balance_visible_$appWidgetId", isBalanceVisible).apply()
-        appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
     companion object {
