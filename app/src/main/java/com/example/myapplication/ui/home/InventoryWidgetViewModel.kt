@@ -4,9 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.data.ProductRepository
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
-class InventoryWidgetViewModel : ViewModel() {
+class InventoryWidgetViewModel(private val repository: ProductRepository) : ViewModel() {
 
     private val _isBalanceVisible = MutableLiveData(false)
     val isBalanceVisible: LiveData<Boolean> = _isBalanceVisible
@@ -18,16 +22,21 @@ class InventoryWidgetViewModel : ViewModel() {
     val hiddenBalance: LiveData<String> = _hiddenBalance
 
     init {
-        // Simular carga del saldo del inventario
         loadInventoryBalance()
     }
 
     private fun loadInventoryBalance() {
         viewModelScope.launch {
-            // Aquí iría la lógica para obtener el saldo real de la base de datos
-            // Por ahora usamos un valor fijo
-            _inventoryBalance.value = "326.000,00"
+            repository.allProducts.collect { products ->
+                val totalBalance = products.sumOf { it.precio * it.cantidad }
+                _inventoryBalance.value = formatBalance(totalBalance)
+            }
         }
+    }
+
+    private fun formatBalance(balance: Double): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
+        return format.format(balance).replace("COP", "$")
     }
 
     fun toggleBalanceVisibility() {
@@ -36,7 +45,7 @@ class InventoryWidgetViewModel : ViewModel() {
 
     fun getDisplayBalance(): String {
         return if (_isBalanceVisible.value == true) {
-            _inventoryBalance.value ?: "0,00"
+            _inventoryBalance.value ?: "$ 0,00"
         } else {
             _hiddenBalance.value ?: "****"
         }
