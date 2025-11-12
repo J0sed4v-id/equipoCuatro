@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentHomeBinding
 import androidx.recyclerview.widget.LinearLayoutManager
-
+import androidx.navigation.fragment.findNavController
+import android.content.Intent
+import com.example.myapplication.AgregarProductoActivity
 
 
 class HomeFragment : Fragment() {
@@ -29,10 +31,14 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.fabAgregarProducto.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_agregarProductoFragment)
+        }
         configurarToolbar()
         configurarBackButton()
         configurarLista()
     }
+
 
     private fun configurarToolbar() {
         binding.toolbarHome.setOnMenuItemClickListener { item ->
@@ -55,9 +61,14 @@ class HomeFragment : Fragment() {
 
     private fun configurarLista() {
 
+        binding.fabAgregarProducto.setOnClickListener {
+            val intent = Intent(requireContext(), AgregarProductoActivity::class.java)
+            startActivity(intent)
+
+        }
+
         binding.progressCircular.visibility = View.VISIBLE
         binding.rvProductos.visibility = View.GONE
-
 
         binding.rvProductos.postDelayed({
             val productos = listOf(

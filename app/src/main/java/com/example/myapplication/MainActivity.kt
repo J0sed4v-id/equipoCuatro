@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         // Botón para ir a la pantalla "Agregar Producto"
         val btnAgregar = findViewById<Button>(R.id.btnAgregarProducto)
+        btnAgregar.visibility = View.GONE
         btnAgregar.setOnClickListener {
             val intent = Intent(this, AgregarProductoActivity::class.java)
             startActivity(intent)
