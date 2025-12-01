@@ -62,11 +62,16 @@ class AgregarProductoFragment : Fragment() {
         }
     }
 
+    // ...
     private fun setupSaveButton() {
         binding.btnGuardarProducto.setOnClickListener {
-            viewModel.saveProduct()
+            // Pasamos el contexto que necesita el ViewModel para actualizar el widget
+            viewModel.saveProduct(requireContext())
         }
     }
+
+// ...
+
 
     private fun observeViewModel() {
         viewModel.isFormValid.observe(viewLifecycleOwner) { isValid ->

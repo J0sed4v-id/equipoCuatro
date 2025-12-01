@@ -38,7 +38,7 @@
             android:exported="false" />
 
         <receiver
-            android:name=".widget.InventoryAppWidget"
+            android:name="com.example.myapplication.ui.widget.InventoryAppWidget"
             android:exported="true"
             android:label="Inventory Widget">
             <intent-filter>
@@ -48,6 +48,7 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_inventory_info" />
         </receiver>
+
 
     </application>
 
