@@ -1,31 +1,43 @@
 package com.example.myapplication.ui.home
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myapplication.R
+import com.example.myapplication.databinding.ItemProductBinding
+import com.example.myapplication.domain.Product
 
 class ProductAdapter(
-    private val productos: List<Product>
+    private var productos: List<Product> = emptyList(),
+    private val onProductClicked: (Product) -> Unit
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
-    inner class ProductViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tvNombre: TextView = view.findViewById(R.id.tvNombre)
-        val tvId: TextView = view.findViewById(R.id.tvId)
+    fun updateList(newList: List<Product>) {
+        productos = newList
+        notifyDataSetChanged()
+    }
+
+    inner class ProductViewHolder(private val binding: ItemProductBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(p: Product) {
+            // Nombre del producto
+            binding.tvNombre.text = p.nombre
+            // ID del producto
+            binding.tvId.text = "ID: ${p.codigo}"
+            // Precio con formato
+            binding.tvPrecio.text = p.formattedPrice()
+
+            binding.root.setOnClickListener {
+                onProductClicked(p)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_product, parent, false)
-        return ProductViewHolder(view)
+        val binding = ItemProductBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ProductViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        val p = productos[position]
-        holder.tvNombre.text = p.nombre
-        holder.tvId.text = "ID: ${p.id}"
+        holder.bind(productos[position])
     }
 
     override fun getItemCount(): Int = productos.size
