@@ -1,102 +1,142 @@
 package com.example.myapplication.ui.login
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import com.airbnb.lottie.LottieAnimationView
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
-import java.util.concurrent.Executor
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+
+// Importa la clase FirebaseAuth para la autenticación de Firebase.
+// import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var executor: Executor
-    private lateinit var biometricPrompt: BiometricPrompt
-    private lateinit var promptInfo: BiometricPrompt.PromptInfo
+    private lateinit var emailEditText: TextInputEditText
+    private lateinit var passwordEditText: TextInputEditText
+    private lateinit var passwordLayout: TextInputLayout
+    private lateinit var loginButton: Button
+    private lateinit var registerButton: TextView
+    // Declara una instancia de FirebaseAuth.
+    // private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Revisar si ya hay sesión activa
-        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
-        val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
-
-        if (isLoggedIn) {
-            // Si ya hay sesión guardada → saltar el login
-            navigateToHome()
-            finish()
-            return
-        }
-
         setContentView(R.layout.activity_login)
-        setupBiometricAuthentication()
-        setupFingerprintAnimation()
-    }
 
-    private fun setupBiometricAuthentication() {
-        executor = ContextCompat.getMainExecutor(this)
+        supportActionBar?.hide()
 
-        biometricPrompt = BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    showMessage("Error de autenticación: $errString")
-                }
+        // --- BLOQUE DE CÓDIGO DE FIREBASE ---
+        // Descomenta la siguiente línea para inicializar Firebase Auth.
+        // auth = FirebaseAuth.getInstance()
 
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    showMessage("¡Autenticación exitosa!")
+        emailEditText = findViewById(R.id.email_edit_text)
+        passwordEditText = findViewById(R.id.password_edit_text)
+        passwordLayout = findViewById(R.id.password_layout)
+        loginButton = findViewById(R.id.login_button)
+        registerButton = findViewById(R.id.register_button)
 
-                    // ✅ Guardar sesión
-                    val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
-                    with(sharedPref.edit()) {
-                        putBoolean("isLoggedIn", true)
-                        apply()
+        loginButton.isEnabled = false
+        registerButton.isEnabled = false
+
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                validateFields()
+            }
+        }
+
+        emailEditText.addTextChangedListener(textWatcher)
+        passwordEditText.addTextChangedListener(textWatcher)
+
+        passwordEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                s?.let {
+                    if (it.length < 6) {
+                        passwordLayout.error = "Mínimo 6 dígitos"
+                    } else {
+                        passwordLayout.error = null
                     }
-
-                    // ✅ Ir al Home
-                    navigateToHome()
                 }
+            }
+        })
 
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    showMessage("Huella no reconocida")
+        loginButton.setOnClickListener {
+            // Navegación temporal para probar el diseño.
+            navigateToHome()
+
+            // --- BLOQUE DE CÓDIGO DE FIREBASE ---
+            // Cuando estés listo para integrar Firebase, elimina la línea `navigateToHome()` de arriba
+            // y descomenta el siguiente bloque de código.
+            /*
+            val email = emailEditText.text.toString().trim()
+            val password = passwordEditText.text.toString().trim()
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        navigateToHome()
+                    } else {
+                        showMessage("Login incorrecto")
+                    }
                 }
-            })
+            */
+        }
 
-        promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Autenticación con huella digital")
-            .setSubtitle("Usa tu huella para acceder a la app")
-            .setNegativeButtonText("Cancelar")
-            .build()
-    }
+        registerButton.setOnClickListener {
+            // Navegación temporal para probar el diseño.
+            navigateToHome()
 
-    private fun setupFingerprintAnimation() {
-        val fingerprintAnimation = findViewById<LottieAnimationView>(R.id.fingerprint_animation)
-        fingerprintAnimation.setOnClickListener {
-            showBiometricPrompt()
+            // --- BLOQUE DE CÓDIGO DE FIREBASE ---
+            // Cuando estés listo para integrar Firebase, elimina la línea `navigateToHome()` de arriba
+            // y descomenta el siguiente bloque de código.
+            /*
+            val email = emailEditText.text.toString().trim()
+            val password = passwordEditText.text.toString().trim()
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        navigateToHome()
+                    } else {
+                        showMessage("Error en el registro")
+                    }
+                }
+            */
         }
     }
 
-    private fun showBiometricPrompt() {
-        val biometricManager = androidx.biometric.BiometricManager.from(this)
-        when (biometricManager.canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
-            androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS -> {
-                biometricPrompt.authenticate(promptInfo)
-            }
-            else -> {
-                showMessage("La autenticación biométrica no está disponible")
-            }
+    private fun validateFields() {
+        val email = emailEditText.text.toString().trim()
+        val password = passwordEditText.text.toString().trim()
+        val areFieldsFilled = email.isNotEmpty() && password.isNotEmpty()
+        val isPasswordValid = password.length >= 6
+
+        loginButton.isEnabled = areFieldsFilled && isPasswordValid
+        registerButton.isEnabled = areFieldsFilled && isPasswordValid
+
+        if (areFieldsFilled && isPasswordValid) {
+            registerButton.setTextColor(ContextCompat.getColor(this, R.color.white))
+            registerButton.typeface = Typeface.DEFAULT_BOLD
+        } else {
+            registerButton.setTextColor(ContextCompat.getColor(this, R.color.grey))
+            registerButton.typeface = Typeface.DEFAULT
         }
     }
 
     private fun navigateToHome() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish() // Evita que el usuario vuelva al login con el botón atrás
+        finish()
     }
 
     private fun showMessage(message: String) {
