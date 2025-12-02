@@ -27,13 +27,16 @@ class LoginActivity : AppCompatActivity() {
         if (isLoggedIn) {
             // Si ya hay sesión guardada → saltar el login
             navigateToHome()
-            finish()
-            return
+            return // No es necesario llamar a finish() aquí, porque navigateToHome ya lo hace
         }
 
         setContentView(R.layout.activity_login)
         setupBiometricAuthentication()
         setupFingerprintAnimation()
+
+        // --- CAMBIO SUGERIDO ---
+        // Muestra el diálogo de autenticación tan pronto como la actividad es visible.
+        showBiometricPrompt()
     }
 
     private fun setupBiometricAuthentication() {
@@ -43,7 +46,10 @@ class LoginActivity : AppCompatActivity() {
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    showMessage("Error de autenticación: $errString")
+                    // No mostramos el toast si el usuario cancela manualmente
+                    if (errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON && errorCode != BiometricPrompt.ERROR_USER_CANCELED) {
+                        showMessage("Error de autenticación: $errString")
+                    }
                 }
 
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
@@ -76,6 +82,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupFingerprintAnimation() {
         val fingerprintAnimation = findViewById<LottieAnimationView>(R.id.fingerprint_animation)
+        // Mantenemos el click por si el usuario cancela y quiere reintentar
         fingerprintAnimation.setOnClickListener {
             showBiometricPrompt()
         }
@@ -88,7 +95,9 @@ class LoginActivity : AppCompatActivity() {
                 biometricPrompt.authenticate(promptInfo)
             }
             else -> {
+                // Si no hay biométricos, ¿qué hacer? Por ahora, mostramos mensaje.
                 showMessage("La autenticación biométrica no está disponible")
+                // En una app real, aquí podrías ofrecer un login con PIN o contraseña.
             }
         }
     }
@@ -103,3 +112,4 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
+
