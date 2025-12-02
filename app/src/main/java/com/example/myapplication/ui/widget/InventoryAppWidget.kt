@@ -24,7 +24,6 @@ class InventoryAppWidget : AppWidgetProvider() {
     private val PREFS_NAME = "com.example.myapplication.ui.widget.InventoryAppWidget"
     private val PREF_PREFIX_KEY = "balance_visible_"
 
-    // onUpdate sigue igual, llama a updateAppWidget para cada widget.
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -36,24 +35,24 @@ class InventoryAppWidget : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        // MUY IMPORTANTE: La acción de toggle se maneja aquí.
+        // Manejo de la acción toggle
         if (intent.action == TOGGLE_BALANCE_ACTION) {
-            val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            val appWidgetId = intent.getIntExtra(
+                AppWidgetManager.EXTRA_APPWIDGET_ID,
+                AppWidgetManager.INVALID_APPWIDGET_ID
+            )
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 val prefs = context.getSharedPreferences(PREFS_NAME, 0)
                 val isVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
                 prefs.edit().putBoolean(PREF_PREFIX_KEY + appWidgetId, !isVisible).apply()
 
-                // Después de cambiar la preferencia, volvemos a dibujar el widget.
+                // Actualizar el widget después de cambiar la preferencia
                 updateAppWidget(context, AppWidgetManager.getInstance(context), appWidgetId)
             }
         }
-        // Pasamos el resto de los intents (como el de actualización) a la clase padre.
         super.onReceive(context, intent)
     }
 
-    // Se ha renombrado la función para mayor claridad.
-    // Esta función ahora solo actualiza la VISTA. No maneja la lógica de clics.
     private fun updateAppWidget(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -64,63 +63,78 @@ class InventoryAppWidget : AppWidgetProvider() {
         val prefs = context.getSharedPreferences(PREFS_NAME, 0)
         val isBalanceVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
 
-        // Asignamos los PendingIntents a los botones correctos
+        // Configurar las acciones de clic
         setupClickActions(context, appWidgetId, views)
 
         GlobalScope.launch(Dispatchers.IO) {
-            // Se obtiene la información de la base de datos
-            val products = application.repository.allProducts.first()
-            val totalBalance = products.sumOf { it.precio * it.cantidad }
-            val formattedBalance = formatBalance(totalBalance)
+            try {
+                // Obtener información de la base de datos
+                val products = application.repository.allProducts.first()
+                val totalBalance = products.sumOf { it.precio * it.cantidad }
+                val formattedBalance = formatBalance(totalBalance)
 
-            // Se actualiza la interfaz
-            val displayBalance = if (isBalanceVisible) formattedBalance else "$ ****"
-            val eyeIcon = if (isBalanceVisible) R.drawable.ic_closed_eye else R.drawable.eye
+                // Actualizar la interfaz
+                val displayBalance = if (isBalanceVisible) {
+                    formattedBalance
+                } else {
+                    "$ * * * *"
+                }
 
-            views.setTextViewText(R.id.tvBalance, displayBalance)
-            views.setImageViewResource(R.id.ivEye, eyeIcon)
+                val eyeIcon = if (isBalanceVisible) {
+                    R.drawable.ic_closed_eye
+                } else {
+                    R.drawable.eye
+                }
 
-            // Finalmente, se le dice al manager que actualice el widget con las vistas modificadas
-            appWidgetManager.updateAppWidget(appWidgetId, views)
+                // Actualizar vistas en el hilo principal
+                GlobalScope.launch(Dispatchers.Main) {
+                    views.setTextViewText(R.id.tvBalance, displayBalance)
+                    views.setImageViewResource(R.id.ivEye, eyeIcon)
+
+                    // Actualizar el widget
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // En caso de error, mostrar valores por defecto
+                GlobalScope.launch(Dispatchers.Main) {
+                    views.setTextViewText(R.id.tvBalance, "$ * * * *")
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
+                }
+            }
         }
     }
 
-// En InventoryAppWidget.kt
-
-    // En InventoryAppWidget.kt
-
-    // En InventoryAppWidget.kt
-
     private fun setupClickActions(
         context: Context,
-        appWidgetId: Int,views: RemoteViews
+        appWidgetId: Int,
+        views: RemoteViews
     ) {
         // --- ACCIÓN PARA EL ÍCONO DEL OJO (Broadcast) ---
-        // Este se queda como está. Es el más seguro.
         val toggleIntent = Intent(context, InventoryAppWidget::class.java).apply {
             action = TOGGLE_BALANCE_ACTION
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            // Usar una URI única sigue siendo crucial
             data = Uri.parse("widget://toggle/$appWidgetId")
         }
 
         val togglePendingIntent = PendingIntent.getBroadcast(
             context,
-            appWidgetId, // request code
+            appWidgetId,
             toggleIntent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE else 0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_IMMUTABLE
+            } else {
+                0
+            }
         )
         views.setOnClickPendingIntent(R.id.ivEye, togglePendingIntent)
 
         // --- ACCIÓN PARA EL BOTÓN "GESTIONAR" (Activity) ---
-        // Aislamos completamente la creación de este PendingIntent.
-        // Usamos TaskStackBuilder para crear un PendingIntent de actividad de la forma más robusta posible.
         val loginIntent = Intent(context, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
-        // Usamos un request code totalmente diferente y estático para esta acción.
-        val loginRequestCode = 999
+        val loginRequestCode = 9999 // Código diferente al del ojo
 
         val loginPendingIntent = PendingIntent.getActivity(
             context,
@@ -135,27 +149,33 @@ class InventoryAppWidget : AppWidgetProvider() {
         views.setOnClickPendingIntent(R.id.btnManageInventory, loginPendingIntent)
     }
 
-
-
-
     private fun formatBalance(balance: Double): String {
-        val format = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
-        return format.format(balance).replace("COP", "$")
+        return try {
+            val format = NumberFormat.getCurrencyInstance(Locale("es", "CO"))
+            val formatted = format.format(balance)
+
+            // Formato personalizado para que coincida con "$ 326.000,00"
+            formatted.replace("COP", "$")
+                .replace("$", "$ ")
+                .trim()
+        } catch (e: Exception) {
+            "$ 0,00"
+        }
     }
 
     companion object {
         const val TOGGLE_BALANCE_ACTION = "com.example.myapplication.TOGGLE_BALANCE_ACTION"
 
         fun triggerUpdate(context: Context) {
-            val intent = Intent(context, InventoryAppWidget::class.java).apply {
-                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-            }
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val componentName = ComponentName(context, InventoryAppWidget::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
+
+            val intent = Intent(context, InventoryAppWidget::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
+            }
             context.sendBroadcast(intent)
         }
     }
 }
-

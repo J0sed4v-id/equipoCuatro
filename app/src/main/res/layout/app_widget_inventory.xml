@@ -1,29 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/widget_background"> <!-- Asume que tienes un fondo llamado widget_background -->
+    android:background="@drawable/widget_background"
+    android:padding="16dp">
 
     <!-- Fila Superior: Título y Ojo -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:paddingHorizontal="4dp">
 
-        <TextView
-            android:id="@+id/tvQuestion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:text="@string/cuanto_tengo_de_inventario"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <!-- ESTE ES EL BOTÓN REAL PARA EL OJO -->
+        <!-- Ojo a la derecha -->
         <ImageView
             android:id="@+id/ivEye"
             android:layout_width="48dp"
@@ -35,26 +25,46 @@
             android:padding="8dp"
             android:src="@drawable/eye" />
 
+        <!-- TextView a la izquierda del ojo -->
+        <TextView
+            android:id="@+id/tvQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/ivEye"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/cuanto_tengo_de_inventario"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
     </RelativeLayout>
 
-    <!-- Saldo del inventario (ocupa el espacio central) -->
+    <!-- Saldo del inventario - A LA DERECHA -->
     <TextView
         android:id="@+id/tvBalance"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="16dp"
+        android:gravity="end"
         android:text="$ * * * *"
         android:textColor="@android:color/white"
         android:textSize="35sp"
-        android:textStyle="bold" />
+        android:textStyle="normal"
+        android:letterSpacing="0.05" />
 
-    <!-- Fila Inferior: Logo y Botón Gestionar -->
+    <!-- Fila Inferior: Logo, Inventory y Gestionar Inventario -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingHorizontal="8dp">
 
-        <!-- Logo -->
+        <!-- Logo ARRIBA del texto "Inventory" (izquierda) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -63,31 +73,27 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/ivLogo"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_inventory_logo"
-                tools:ignore="ContentDescription" />
+            <!-- Logo ARRIBA -->
 
+            <!-- Texto "Inventory" ABAJO del logo -->
             <TextView
                 android:id="@+id/tvAppName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="4dp"
                 android:text="@string/inventory"
                 android:textColor="#e7522e"
-                android:textSize="10sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- ESTE ES EL BOTÓN REAL PARA GESTIONAR -->
+        <!-- "Gestionar Inventario" + Ícono (derecha) -->
         <LinearLayout
             android:id="@+id/btnManageInventory"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="49dp"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
+            android:layout_marginEnd="-23dp"
             android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -98,15 +104,23 @@
                 android:layout_height="wrap_content"
                 android:text="@string/manage_inventory"
                 android:textColor="@android:color/white"
-                android:textSize="10sp" />
+                android:textSize="18sp" />
 
             <ImageView
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:layout_marginStart="4dp"
-                android:src="@drawable/ic_add"
+                android:layout_width="62dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="8dp"
+                android:src="@mipmap/ic_inventory_config"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
+
     </RelativeLayout>
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="94dp"
+        android:layout_height="616dp"
+        android:src="@mipmap/inventorywidget_foreground"
+        tools:ignore="ContentDescription" />
+
+</RelativeLayout>
