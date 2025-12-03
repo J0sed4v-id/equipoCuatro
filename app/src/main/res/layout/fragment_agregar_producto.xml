@@ -13,13 +13,13 @@
         android:id="@+id/toolbarAgregarProducto"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
+        app:title="Agregar Producto"
         android:background="#424242"
-        android:title="Agregar producto"
-        android:titleTextColor="@android:color/white"
+        app:titleTextColor="@color/white"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Contenedor scrollable para campos de formulario -->
     <ScrollView
@@ -125,12 +125,12 @@
                 android:layout_height="wrap_content"
                 android:text="Guardar"
                 android:textSize="16sp"
-                android:textStyle="bold"
+                android:textStyle="normal"
                 android:padding="16dp"
                 android:enabled="false"
                 app:backgroundTint="#e7522e"
-                android:textColor="@color/white"
-                app:cornerRadius="8dp" />
+                android:textColor="@color/gray_500"
+                app:cornerRadius="50dp" />
 
         </LinearLayout>
     </ScrollView>

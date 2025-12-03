@@ -22,9 +22,21 @@ class ProductDetailViewModel(private val repository: ProductRepository) : ViewMo
         }
     }
 
+    private val _deleteSuccessful = MutableLiveData<Boolean?>()
+    val deleteSuccessful: LiveData<Boolean?> = _deleteSuccessful
+
     fun deleteProduct(id: String) {
         viewModelScope.launch {
-            repository.deleteById(id)
+            try {
+                repository.deleteById(id)
+                _deleteSuccessful.value = true
+            } catch (e: Exception) {
+                _deleteSuccessful.value = false
+            }
         }
+    }
+
+    fun resetDeleteStatus() {
+        _deleteSuccessful.value = null
     }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "163376281898",
+    "project_id": "equipocuatro-a3b97",
+    "storage_bucket": "equipocuatro-a3b97.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:163376281898:android:c6df4be4b3e267d71fc653",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUjyP8KbXb2_Ww2pWPWzcHIadJH1OE1F4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

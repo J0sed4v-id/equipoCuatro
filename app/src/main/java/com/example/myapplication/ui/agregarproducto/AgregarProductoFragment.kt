@@ -15,7 +15,6 @@ import com.example.myapplication.databinding.FragmentAgregarProductoBinding
 import com.example.myapplication.ui.ViewModelFactory
 import androidx.core.content.ContextCompat
 
-
 class AgregarProductoFragment : Fragment() {
 
     private var _binding: FragmentAgregarProductoBinding? = null
@@ -65,20 +64,26 @@ class AgregarProductoFragment : Fragment() {
         }
     }
 
-    // ...
     private fun setupSaveButton() {
         binding.btnGuardarProducto.setOnClickListener {
-            // Pasamos el contexto que necesita el ViewModel para actualizar el widget
             viewModel.saveProduct(requireContext())
         }
     }
 
-// ...
-
-
     private fun observeViewModel() {
         viewModel.isFormValid.observe(viewLifecycleOwner) { isValid ->
             binding.btnGuardarProducto.isEnabled = isValid
+
+            // CRITERIO 7: Cambiar estilo del texto cuando está habilitado
+            if (isValid) {
+                // Botón habilitado - texto blanco bold
+                binding.btnGuardarProducto.setTextColor(resources.getColor(android.R.color.white, null))
+                binding.btnGuardarProducto.setTypeface(null, android.graphics.Typeface.BOLD)
+            } else {
+                // Botón deshabilitado - texto gris (opcional)
+                binding.btnGuardarProducto.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+                binding.btnGuardarProducto.setTypeface(null, android.graphics.Typeface.NORMAL)
+            }
         }
 
         viewModel.saveSuccessful.observe(viewLifecycleOwner) { isSuccessful ->
@@ -99,7 +104,6 @@ class AgregarProductoFragment : Fragment() {
                 null -> {
                     // No hacer nada
                 }
-
             }
         }
     }

@@ -1,115 +1,147 @@
 package com.example.myapplication.ui.login
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import com.airbnb.lottie.LottieAnimationView
+import androidx.core.widget.doOnTextChanged
 import com.example.myapplication.MainActivity
 import com.example.myapplication.R
-import java.util.concurrent.Executor
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var executor: Executor
-    private lateinit var biometricPrompt: BiometricPrompt
-    private lateinit var promptInfo: BiometricPrompt.PromptInfo
+    private lateinit var auth: FirebaseAuth
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Revisar si ya hay sesión activa
-        val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
-        val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
-
-        if (isLoggedIn) {
-            // Si ya hay sesión guardada → saltar el login
-            navigateToHome()
-            return // No es necesario llamar a finish() aquí, porque navigateToHome ya lo hace
-        }
-
         setContentView(R.layout.activity_login)
-        setupBiometricAuthentication()
-        setupFingerprintAnimation()
 
-        // --- CAMBIO SUGERIDO ---
-        // Muestra el diálogo de autenticación tan pronto como la actividad es visible.
-        showBiometricPrompt()
-    }
+        supportActionBar?.hide()
 
-    private fun setupBiometricAuthentication() {
-        executor = ContextCompat.getMainExecutor(this)
+        auth = FirebaseAuth.getInstance()
 
-        biometricPrompt = BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    // No mostramos el toast si el usuario cancela manualmente
-                    if (errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON && errorCode != BiometricPrompt.ERROR_USER_CANCELED) {
-                        showMessage("Error de autenticación: $errString")
+        // Si ya hay sesión iniciada, ir al Home
+        if (auth.currentUser != null) {
+            irAlHome()
+        }
+
+        //  Buscamos los controles
+        val etEmail = findViewById<TextInputEditText>(R.id.email_edit_text)
+        val etPassword = findViewById<TextInputEditText>(R.id.password_edit_text)
+        //  layout de la contraseña para mostrar el error rojo
+        val layoutPassword = findViewById<TextInputLayout>(R.id.password_layout)
+
+        val btnLogin = findViewById<Button>(R.id.login_button)
+        val btnRegister = findViewById<TextView>(R.id.register_button)
+
+        // 2. Función para validar reglas y habilitar botones
+        fun validarCampos() {
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+
+            // Reglas: Email no vacío y Contraseña >= 6
+            val emailOk = email.isNotEmpty()
+            val passOk = password.length >= 6
+
+            val todoOk = emailOk && passOk
+
+            // Activar o desactivar botones
+            btnLogin.isEnabled = todoOk
+            if (todoOk) {
+                btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+                btnLogin.typeface = Typeface.DEFAULT_BOLD
+            } else {
+                btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+                btnLogin.typeface = Typeface.DEFAULT
+            }
+
+
+            btnRegister.isEnabled = todoOk
+
+            // Cambiar estilos visuales
+            if (todoOk) {
+                btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+                btnLogin.typeface = Typeface.DEFAULT_BOLD
+
+                btnRegister.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+                btnRegister.typeface = Typeface.DEFAULT_BOLD
+            } else {
+                // Estilo deshabilitado
+                btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+                btnLogin.typeface = Typeface.DEFAULT
+
+                // Color gris para registrarse
+                btnRegister.setTextColor(ContextCompat.getColor(this, R.color.grey))
+                btnRegister.typeface = Typeface.DEFAULT
+            }
+        }
+
+        // 3. Escuchamos cambios en el Email para validar al instante
+        etEmail.doOnTextChanged { _, _, _, _ ->
+            validarCampos()
+        }
+
+        // 4. Escuchamos cambios en el Password
+        etPassword.doOnTextChanged { text, _, _, _ ->
+            if (text.toString().length < 6) {
+                layoutPassword.error = "Mínimo 6 dígitos" // Muestra mensaje rojo
+            } else {
+                layoutPassword.error = null // Quita mensaje rojo
+            }
+            validarCampos()
+        }
+
+        // 5. BOTÓN LOGIN
+        btnLogin.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        irAlHome()
+                    } else {
+                        // Criterio 9: Mensaje específico si falla
+                        Toast.makeText(this, "Login incorrecto", Toast.LENGTH_SHORT).show()
                     }
                 }
+        }
 
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    showMessage("¡Autenticación exitosa!")
+        // 6. BOTÓN REGISTRARSE
+        btnRegister.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
 
-                    // ✅ Guardar sesión
-                    val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
-                    with(sharedPref.edit()) {
-                        putBoolean("isLoggedIn", true)
-                        apply()
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "¡Registro exitoso! Bienvenido.", Toast.LENGTH_LONG).show()
+
+                        irAlHome()
+                    } else {
+                        // Criterio 13: Mensaje si el usuario ya existe
+                        if (task.exception is FirebaseAuthUserCollisionException) {
+                            Toast.makeText(this, "Error en el registro: el usuario ya existe", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(this, "Error en el registro", Toast.LENGTH_SHORT).show()
+                        }
                     }
-
-                    // ✅ Ir al Home
-                    navigateToHome()
                 }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    showMessage("Huella no reconocida")
-                }
-            })
-
-        promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Autenticación con huella digital")
-            .setSubtitle("Usa tu huella para acceder a la app")
-            .setNegativeButtonText("Cancelar")
-            .build()
-    }
-
-    private fun setupFingerprintAnimation() {
-        val fingerprintAnimation = findViewById<LottieAnimationView>(R.id.fingerprint_animation)
-        // Mantenemos el click por si el usuario cancela y quiere reintentar
-        fingerprintAnimation.setOnClickListener {
-            showBiometricPrompt()
         }
     }
 
-    private fun showBiometricPrompt() {
-        val biometricManager = androidx.biometric.BiometricManager.from(this)
-        when (biometricManager.canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
-            androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS -> {
-                biometricPrompt.authenticate(promptInfo)
-            }
-            else -> {
-                // Si no hay biométricos, ¿qué hacer? Por ahora, mostramos mensaje.
-                showMessage("La autenticación biométrica no está disponible")
-                // En una app real, aquí podrías ofrecer un login con PIN o contraseña.
-            }
-        }
-    }
-
-    private fun navigateToHome() {
+    private fun irAlHome() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish() // Evita que el usuario vuelva al login con el botón atrás
-    }
-
-    private fun showMessage(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        finish()
     }
 }
-

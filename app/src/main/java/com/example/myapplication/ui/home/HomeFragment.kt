@@ -18,6 +18,8 @@ import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.ui.ViewModelFactory
 import com.example.myapplication.ui.login.LoginActivity
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.firebase.auth.FirebaseAuth // Importante para cerrar sesión real
 
 class HomeFragment : Fragment() {
 
@@ -42,7 +44,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
+        val toolbar = view.findViewById<MaterialToolbar>(R.id.toolbarHome)
         setupToolbar()
         setupBackButtonBehavior()
         setupRecyclerView()
@@ -50,7 +52,7 @@ class HomeFragment : Fragment() {
         observeViewModel()
     }
 
-    //Evitar volver al login con el botón atrás
+    // Evitar volver al login con el botón atrás
     private fun setupBackButtonBehavior() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             requireActivity().finishAffinity() // Cierra completamente la app
@@ -59,28 +61,40 @@ class HomeFragment : Fragment() {
 
     // Toolbar con botón de cerrar sesión
     private fun setupToolbar() {
+        // 1. Configuración visual básica
+        binding.toolbarHome.subtitle = null
 
+        // 2. Limpiamos por si acaso había basura de otra pantalla...
+        binding.toolbarHome.menu.clear()
+
+        // 3. ...¡Y AQUÍ CARGAMOS EL MENÚ CORRECTO! (Esta es la línea que faltaba)
+        binding.toolbarHome.inflateMenu(R.menu.menu_home)
+
+        // 4. Ahora sí, escuchamos el clic
         binding.toolbarHome.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_logout -> {
-                    // 🔒 Cerrar sesión y borrar SharedPreferences
+                    // 1. Cerrar sesión en FIREBASE
+                    FirebaseAuth.getInstance().signOut()
+
+                    // 2. Borrar SharedPreferences
                     val sharedPref = requireActivity().getSharedPreferences(
                         "UserSession",
                         AppCompatActivity.MODE_PRIVATE
                     )
-                    val editor = sharedPref.edit()
-                    editor.clear() // Borra la sesión guardada
-                    editor.apply()
+                    with(sharedPref.edit()) {
+                        clear()
+                        apply()
+                    }
 
-                    Toast.makeText(requireContext(), "Cerrando sesión...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Sesión cerrada", Toast.LENGTH_SHORT).show()
 
-                    // 🔁 Volver al Login y limpiar historial
+                    // 3. Volver al Login
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                     true
                 }
-
                 else -> false
             }
         }
@@ -106,7 +120,6 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.action_homeFragment_to_agregarProductoFragment)
             }
         }
-
     }
 
     // Observadores del ViewModel
