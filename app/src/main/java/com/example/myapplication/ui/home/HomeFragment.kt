@@ -103,7 +103,7 @@ class HomeFragment : Fragment() {
     // Configuración del RecyclerView
     private fun setupRecyclerView() {
         productAdapter = ProductAdapter { product ->
-            val action = HomeFragmentDirections.actionHomeFragmentToProductDetailFragment(product.codigo.toInt())
+            val action = HomeFragmentDirections.actionHomeFragmentToProductDetailFragment(product.codigo)
             findNavController().navigate(action)
         }
         binding.rvProductos.apply {

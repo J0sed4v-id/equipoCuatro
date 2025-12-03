@@ -50,7 +50,7 @@
             app:popUpToInclusive="true" />
         <argument
             android:name="productId"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
 
     <fragment
@@ -65,7 +65,7 @@
             app:popUpToInclusive="true" />
         <argument
             android:name="productId"
-            app:argType="integer" />
+            app:argType="string" />
     </fragment>
 
 </navigation>

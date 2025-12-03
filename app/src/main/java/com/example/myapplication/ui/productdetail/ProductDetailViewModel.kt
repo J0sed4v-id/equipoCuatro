@@ -16,8 +16,8 @@ class ProductDetailViewModel(private val repository: ProductRepository) : ViewMo
 
     fun getProductById(id: String) {
         viewModelScope.launch {
-            repository.getProductById(id).asLiveData().observeForever {
-                _product.value = it
+            repository.getProductById(id).collect { product ->
+                _product.postValue(product)
             }
         }
     }
