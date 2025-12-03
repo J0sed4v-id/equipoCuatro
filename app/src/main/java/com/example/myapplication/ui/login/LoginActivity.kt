@@ -4,21 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
-import com.airbnb.lottie.LottieAnimationView
 import com.example.myapplication.MainActivity
-import com.example.myapplication.R
-import java.util.concurrent.Executor
+import com.example.myapplication.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var executor: Executor
-    private lateinit var biometricPrompt: BiometricPrompt
-    private lateinit var promptInfo: BiometricPrompt.PromptInfo
+    private lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Revisar si ya hay sesión activa
         val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
@@ -27,78 +24,30 @@ class LoginActivity : AppCompatActivity() {
         if (isLoggedIn) {
             // Si ya hay sesión guardada → saltar el login
             navigateToHome()
-            return // No es necesario llamar a finish() aquí, porque navigateToHome ya lo hace
+            return
         }
 
-        setContentView(R.layout.activity_login)
-        setupBiometricAuthentication()
-        setupFingerprintAnimation()
+        // Configurar botón de login
+        binding.loginButton.setOnClickListener {
+            val email = binding.emailEditText.text.toString().trim()
+            val password = binding.passwordEditText.text.toString().trim()
 
-        // --- CAMBIO SUGERIDO ---
-        // Muestra el diálogo de autenticación tan pronto como la actividad es visible.
-        showBiometricPrompt()
-    }
-
-    private fun setupBiometricAuthentication() {
-        executor = ContextCompat.getMainExecutor(this)
-
-        biometricPrompt = BiometricPrompt(this, executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    super.onAuthenticationError(errorCode, errString)
-                    // No mostramos el toast si el usuario cancela manualmente
-                    if (errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON && errorCode != BiometricPrompt.ERROR_USER_CANCELED) {
-                        showMessage("Error de autenticación: $errString")
-                    }
+            if (email.isEmpty() || password.isEmpty()) {
+                showMessage("Por favor ingrese email y contraseña")
+            } else {
+                // Aquí va la lógica de autenticación
+                // Por ahora solo guardamos la sesión y navegamos al Home
+                with(sharedPref.edit()) {
+                    putBoolean("isLoggedIn", true)
+                    apply()
                 }
-
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    super.onAuthenticationSucceeded(result)
-                    showMessage("¡Autenticación exitosa!")
-
-                    // ✅ Guardar sesión
-                    val sharedPref = getSharedPreferences("UserSession", MODE_PRIVATE)
-                    with(sharedPref.edit()) {
-                        putBoolean("isLoggedIn", true)
-                        apply()
-                    }
-
-                    // ✅ Ir al Home
-                    navigateToHome()
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    showMessage("Huella no reconocida")
-                }
-            })
-
-        promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Autenticación con huella digital")
-            .setSubtitle("Usa tu huella para acceder a la app")
-            .setNegativeButtonText("Cancelar")
-            .build()
-    }
-
-    private fun setupFingerprintAnimation() {
-        val fingerprintAnimation = findViewById<LottieAnimationView>(R.id.fingerprint_animation)
-        // Mantenemos el click por si el usuario cancela y quiere reintentar
-        fingerprintAnimation.setOnClickListener {
-            showBiometricPrompt()
+                navigateToHome()
+            }
         }
-    }
 
-    private fun showBiometricPrompt() {
-        val biometricManager = androidx.biometric.BiometricManager.from(this)
-        when (biometricManager.canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
-            androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS -> {
-                biometricPrompt.authenticate(promptInfo)
-            }
-            else -> {
-                // Si no hay biométricos, ¿qué hacer? Por ahora, mostramos mensaje.
-                showMessage("La autenticación biométrica no está disponible")
-                // En una app real, aquí podrías ofrecer un login con PIN o contraseña.
-            }
+        // Configurar botón de registro
+        binding.registerButton.setOnClickListener {
+            showMessage("Función de registro aún no implementada")
         }
     }
 
@@ -112,4 +61,5 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
+
 

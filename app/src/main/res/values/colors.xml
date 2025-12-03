@@ -23,4 +23,7 @@
     <color name="pink_700">#C2185B</color>
     <color name="amber_500">#FFC107</color>
     <color name="amber_700">#FFA000</color>
+    <color name="text_input_border">#FF000000</color>
+    <color name="grey">#FF808080</color>
+
 </resources>
