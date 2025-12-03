@@ -18,7 +18,7 @@ class InventoryWidgetViewModel(private val repository: ProductRepository) : View
     private val _inventoryBalance = MutableLiveData<String>()
     val inventoryBalance: LiveData<String> = _inventoryBalance
 
-    private val _hiddenBalance = MutableLiveData("****")
+    private val _hiddenBalance = MutableLiveData("**")
     val hiddenBalance: LiveData<String> = _hiddenBalance
 
     init {
@@ -27,7 +27,7 @@ class InventoryWidgetViewModel(private val repository: ProductRepository) : View
 
     private fun loadInventoryBalance() {
         viewModelScope.launch {
-            repository.allProducts.collect { products ->
+            repository.getAllProducts().collect { products ->
                 val totalBalance = products.sumOf { it.precio * it.cantidad }
                 _inventoryBalance.value = formatBalance(totalBalance)
             }
@@ -47,7 +47,7 @@ class InventoryWidgetViewModel(private val repository: ProductRepository) : View
         return if (_isBalanceVisible.value == true) {
             _inventoryBalance.value ?: "$ 0,00"
         } else {
-            _hiddenBalance.value ?: "****"
+            _hiddenBalance.value ?: "**"
         }
     }
 }

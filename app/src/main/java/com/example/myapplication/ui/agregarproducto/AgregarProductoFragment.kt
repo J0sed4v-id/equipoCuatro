@@ -9,11 +9,10 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.example.myapplication.MyApplication
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentAgregarProductoBinding
 import com.example.myapplication.ui.ViewModelFactory
-import androidx.core.content.ContextCompat
+
 
 class AgregarProductoFragment : Fragment() {
 
@@ -21,7 +20,7 @@ class AgregarProductoFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: AgregarProductoViewModel by viewModels {
-        ViewModelFactory(requireActivity().application as MyApplication)
+        ViewModelFactory()
     }
 
     override fun onCreateView(
@@ -42,8 +41,6 @@ class AgregarProductoFragment : Fragment() {
     }
 
     private fun setupToolbar() {
-        binding.toolbarAgregarProducto.title = "Agregar producto"
-        binding.toolbarAgregarProducto.setTitleTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
         binding.toolbarAgregarProducto.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
@@ -64,26 +61,19 @@ class AgregarProductoFragment : Fragment() {
         }
     }
 
+    // ...
     private fun setupSaveButton() {
         binding.btnGuardarProducto.setOnClickListener {
-            viewModel.saveProduct(requireContext())
+            viewModel.saveProduct()
         }
     }
+
+// ...
+
 
     private fun observeViewModel() {
         viewModel.isFormValid.observe(viewLifecycleOwner) { isValid ->
             binding.btnGuardarProducto.isEnabled = isValid
-
-            // CRITERIO 7: Cambiar estilo del texto cuando está habilitado
-            if (isValid) {
-                // Botón habilitado - texto blanco bold
-                binding.btnGuardarProducto.setTextColor(resources.getColor(android.R.color.white, null))
-                binding.btnGuardarProducto.setTypeface(null, android.graphics.Typeface.BOLD)
-            } else {
-                // Botón deshabilitado - texto gris (opcional)
-                binding.btnGuardarProducto.setTextColor(resources.getColor(android.R.color.darker_gray, null))
-                binding.btnGuardarProducto.setTypeface(null, android.graphics.Typeface.NORMAL)
-            }
         }
 
         viewModel.saveSuccessful.observe(viewLifecycleOwner) { isSuccessful ->
@@ -104,6 +94,7 @@ class AgregarProductoFragment : Fragment() {
                 null -> {
                     // No hacer nada
                 }
+
             }
         }
     }
