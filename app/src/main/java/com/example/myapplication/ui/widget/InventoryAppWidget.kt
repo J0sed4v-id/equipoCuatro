@@ -37,7 +37,7 @@ class InventoryAppWidget : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        // --- COMIENZO DEL CAMBIO: CRITERIO 7 ---
+        // --- CAMBIO: CRITERIO 7 ---
         // Se maneja la acción de clic en el ícono del ojo para mostrar u ocultar el saldo.
         if (intent.action == TOGGLE_BALANCE_ACTION) {
             val appWidgetId = intent.getIntExtra(
