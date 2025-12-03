@@ -18,6 +18,7 @@ import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.ui.ViewModelFactory
 import com.example.myapplication.ui.login.LoginActivity
+import com.google.firebase.auth.FirebaseAuth // Importante para cerrar sesión real
 
 class HomeFragment : Fragment() {
 
@@ -42,7 +43,6 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         setupToolbar()
         setupBackButtonBehavior()
         setupRecyclerView()
@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
         observeViewModel()
     }
 
-    //Evitar volver al login con el botón atrás
+    // Evitar volver al login con el botón atrás
     private fun setupBackButtonBehavior() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             requireActivity().finishAffinity() // Cierra completamente la app
@@ -59,11 +59,18 @@ class HomeFragment : Fragment() {
 
     // Toolbar con botón de cerrar sesión
     private fun setupToolbar() {
+        // Aseguramos que no haya subtítulos (correo)
+        binding.toolbarHome.subtitle = null
+
+        binding.toolbarHome.menu.clear()
 
         binding.toolbarHome.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_logout -> {
-                    // 🔒 Cerrar sesión y borrar SharedPreferences
+                    // 1. 🔒 Cerrar sesión en FIREBASE (Importante)
+                    FirebaseAuth.getInstance().signOut()
+
+                    // 2. Borrar SharedPreferences (Tu lógica original)
                     val sharedPref = requireActivity().getSharedPreferences(
                         "UserSession",
                         AppCompatActivity.MODE_PRIVATE
@@ -74,7 +81,7 @@ class HomeFragment : Fragment() {
 
                     Toast.makeText(requireContext(), "Cerrando sesión...", Toast.LENGTH_SHORT).show()
 
-                    // 🔁 Volver al Login y limpiar historial
+                    // 3. 🔁 Volver al Login y limpiar historial
                     val intent = Intent(requireContext(), LoginActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
@@ -106,7 +113,6 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.action_homeFragment_to_agregarProductoFragment)
             }
         }
-
     }
 
     // Observadores del ViewModel
