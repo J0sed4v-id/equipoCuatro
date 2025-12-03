@@ -28,9 +28,12 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="32dp"
-        android:textColorHint="@color/grey"
-        app:boxStrokeColor="@color/text_input_border"
-        app:hintTextColor="@color/text_input_border"
+
+
+        android:textColorHint="#808080"
+        app:boxStrokeColor="@color/selector_borde_input"
+        app:hintTextColor="@android:color/white"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/logo_image">
@@ -42,7 +45,8 @@
             android:hint="Email"
             android:textColor="@android:color/white"
             android:inputType="textEmailAddress"
-            android:maxLength="40" />
+            android:maxLength="40"
+            android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -53,9 +57,11 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="16dp"
-        android:textColorHint="@color/grey"
-        app:boxStrokeColor="@color/text_input_border"
-        app:hintTextColor="@color/text_input_border"
+
+        android:textColorHint="#808080"
+        app:boxStrokeColor="@color/selector_borde_input"
+        app:hintTextColor="@color/white"
+
         app:passwordToggleEnabled="true"
         app:passwordToggleTint="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
@@ -80,6 +86,7 @@
         android:layout_marginEnd="32dp"
         android:layout_marginTop="32dp"
         android:backgroundTint="@android:color/holo_orange_dark"
+        android:enabled="false"
         android:text="Login"
         android:textColor="@android:color/white"
         app:cornerRadius="20dp"
@@ -95,6 +102,8 @@
         android:text="Registrarse"
         android:textColor="#9EA1A1"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"        app:layout_constraintStart_toStartOf="parent"        app:layout_constraintTop_toBottomOf="@id/login_button" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/login_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

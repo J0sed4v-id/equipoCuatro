@@ -20,6 +20,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -33,16 +34,16 @@ class LoginActivity : AppCompatActivity() {
             irAlHome()
         }
 
-        // 1. Buscamos los controles
+        //  Buscamos los controles
         val etEmail = findViewById<TextInputEditText>(R.id.email_edit_text)
         val etPassword = findViewById<TextInputEditText>(R.id.password_edit_text)
-        // Necesitamos el layout de la contraseña para mostrar el error rojo (Criterio 5)
+        //  layout de la contraseña para mostrar el error rojo
         val layoutPassword = findViewById<TextInputLayout>(R.id.password_layout)
 
         val btnLogin = findViewById<Button>(R.id.login_button)
         val btnRegister = findViewById<TextView>(R.id.register_button)
 
-        // 2. Función para validar reglas y habilitar botones (Criterios 8 y 12)
+        // 2. Función para validar reglas y habilitar botones
         fun validarCampos() {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -55,9 +56,18 @@ class LoginActivity : AppCompatActivity() {
 
             // Activar o desactivar botones
             btnLogin.isEnabled = todoOk
+            if (todoOk) {
+                btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+                btnLogin.typeface = Typeface.DEFAULT_BOLD
+            } else {
+                btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+                btnLogin.typeface = Typeface.DEFAULT
+            }
+
+
             btnRegister.isEnabled = todoOk
 
-            // Cambiar estilos visuales (Blanco y Bold)
+            // Cambiar estilos visuales
             if (todoOk) {
                 btnLogin.setTextColor(ContextCompat.getColor(this, android.R.color.white))
                 btnLogin.typeface = Typeface.DEFAULT_BOLD
@@ -80,7 +90,7 @@ class LoginActivity : AppCompatActivity() {
             validarCampos()
         }
 
-        // 4. Escuchamos cambios en el Password (Criterio 5: Error en tiempo real)
+        // 4. Escuchamos cambios en el Password
         etPassword.doOnTextChanged { text, _, _, _ ->
             if (text.toString().length < 6) {
                 layoutPassword.error = "Mínimo 6 dígitos" // Muestra mensaje rojo
@@ -90,7 +100,7 @@ class LoginActivity : AppCompatActivity() {
             validarCampos()
         }
 
-        // 5. BOTÓN LOGIN (Criterios 9 y 10)
+        // 5. BOTÓN LOGIN
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -106,7 +116,7 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
-        // 6. BOTÓN REGISTRARSE (Criterios 13 y 14)
+        // 6. BOTÓN REGISTRARSE
         btnRegister.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -114,6 +124,8 @@ class LoginActivity : AppCompatActivity() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        Toast.makeText(this, "¡Registro exitoso! Bienvenido.", Toast.LENGTH_LONG).show()
+
                         irAlHome()
                     } else {
                         // Criterio 13: Mensaje si el usuario ya existe
