@@ -17,7 +17,7 @@ class HomeViewModel(repository: ProductRepository) : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
     // Representa la lista de productos
-    val products: LiveData<List<Product>> = repository.allProducts
+    val products: LiveData<List<Product>> = repository.getAllProducts()
         // Antes de emitir datos, muestra el progress bar
         .onStart { _isLoading.value = true }
         // Cuando se emiten los datos, oculta el progress bar

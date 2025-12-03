@@ -1,7 +1,6 @@
 package com.example.myapplication.ui.editproduct
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -11,15 +10,10 @@ import kotlinx.coroutines.launch
 
 class EditProductViewModel(private val repository: ProductRepository) : ViewModel() {
 
-    private val _product = MutableLiveData<Product>()
-    val product: LiveData<Product> = _product
+    lateinit var product: LiveData<Product>
 
     fun getProductById(id: String) {
-        viewModelScope.launch {
-            repository.getProductById(id).asLiveData().observeForever {
-                _product.value = it
-            }
-        }
+        product = repository.getProductById(id).asLiveData()
     }
 
     fun updateProduct(product: Product) {

@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.example.myapplication.MyApplication
 import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentEditProductBinding
 import com.example.myapplication.domain.Product
@@ -36,7 +35,7 @@ class EditProductFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val factory = ViewModelFactory(requireActivity().application as MyApplication)
+        val factory = ViewModelFactory()
         viewModel = ViewModelProvider(this, factory).get(EditProductViewModel::class.java)
 
         (activity as AppCompatActivity).setSupportActionBar(binding.toolbarEditProduct)
@@ -50,7 +49,7 @@ class EditProductFragment : Fragment() {
             val name = binding.etProductName.text.toString()
             val price = binding.etProductPrice.text.toString().toDouble()
             val quantity = binding.etProductQuantity.text.toString().toInt()
-            val product = Product(args.productId.toString(), name, price, quantity)
+            val product = Product(args.productId, name, price, quantity)
             viewModel.updateProduct(product)
             findNavController().navigate(R.id.action_editProductFragment_to_homeFragment)
         }
@@ -73,11 +72,11 @@ class EditProductFragment : Fragment() {
         binding.etProductPrice.addTextChangedListener(textWatcher)
         binding.etProductQuantity.addTextChangedListener(textWatcher)
 
-        viewModel.getProductById(args.productId.toString())
+        viewModel.getProductById(args.productId)
 
         viewModel.product.observe(viewLifecycleOwner) { product ->
             product?.let {
-                binding.tvProductId.text = it.codigo
+                binding.tvProductId.text = it.id
                 binding.etProductName.setText(it.nombre)
                 binding.etProductPrice.setText(it.precio.toString())
                 binding.etProductQuantity.setText(it.cantidad.toString())

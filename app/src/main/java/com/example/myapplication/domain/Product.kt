@@ -1,14 +1,12 @@
 package com.example.myapplication.domain
 
 data class Product(
-    val codigo: String,
-    val nombre: String,
-    val precio: Double,
-    val cantidad: Int
+    val id: String = "",
+    val nombre: String = "",
+    val precio: Double = 0.0,
+    val cantidad: Int = 0
 ) {
-
     fun formattedPrice(): String {
-        // Formato: $00.000,00
         val priceString = String.format("%,.2f", precio)
             .replace('.', '_')
             .replace(',', '.')

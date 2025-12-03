@@ -7,7 +7,6 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
 
     <application
-        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -28,9 +27,9 @@
             </intent-filter>
         </activity>
 
-<!--        <activity-->
-<!--            android:name=".AgregarProductoActivity"-->
-<!--            android:exported="false" />-->
+        <!--        <activity-->
+        <!--            android:name=".AgregarProductoActivity"-->
+        <!--            android:exported="false" />-->
 
         <!-- Pantalla principal (Home) -->
         <activity

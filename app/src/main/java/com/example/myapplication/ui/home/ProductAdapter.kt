@@ -21,7 +21,7 @@ class ProductAdapter(
             // Nombre del producto
             binding.tvNombre.text = p.nombre
             // ID del producto
-            binding.tvId.text = "ID: ${p.codigo}"
+            binding.tvId.text = "ID: ${p.id}"
             // Precio con formato
             binding.tvPrecio.text = p.formattedPrice()
 
@@ -42,3 +42,4 @@ class ProductAdapter(
 
     override fun getItemCount(): Int = productos.size
 }
+

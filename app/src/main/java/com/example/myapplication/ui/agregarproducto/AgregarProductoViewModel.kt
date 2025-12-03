@@ -1,6 +1,5 @@
 package com.example.myapplication.ui.agregarproducto
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.ProductRepository
 import com.example.myapplication.domain.Product
-import com.example.myapplication.ui.widget.InventoryAppWidget
 import kotlinx.coroutines.launch
 
 class AgregarProductoViewModel(private val repository: ProductRepository) : ViewModel() {
@@ -46,11 +44,10 @@ class AgregarProductoViewModel(private val repository: ProductRepository) : View
         isFormValid.value = isValid
     }
 
-    // 3. MODIFICAR LA FIRMA DE LA FUNCIÓN
-    fun saveProduct(context: Context) {
+    fun saveProduct() {
         if (isFormValid.value == true) {
             val newProduct = Product(
-                codigo = codigo.value.orEmpty(),
+                id = codigo.value.orEmpty(),
                 nombre = nombre.value.orEmpty(),
                 precio = precio.value?.toDoubleOrNull() ?: 0.0,
                 cantidad = cantidad.value?.toIntOrNull() ?: 0
@@ -60,10 +57,6 @@ class AgregarProductoViewModel(private val repository: ProductRepository) : View
                 try {
                     repository.insert(newProduct)
                     _saveSuccessful.value = true
-
-                    // 4. AÑADIR LA LLAMADA PARA ACTUALIZAR EL WIDGET
-                    InventoryAppWidget.triggerUpdate(context.applicationContext)
-
                 } catch (e: Exception) {
                     _saveSuccessful.value = false
                 }
