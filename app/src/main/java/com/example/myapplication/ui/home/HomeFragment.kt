@@ -80,7 +80,7 @@ class HomeFragment : Fragment() {
 
                     // 4. Iniciar la actividad y cerrar la actual.
                     startActivity(intent)
-                    requireActivity().finish() 
+                    requireActivity().finish()
 
                     true
                 }
