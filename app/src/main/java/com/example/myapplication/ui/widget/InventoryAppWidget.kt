@@ -9,9 +9,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.widget.RemoteViews
+import android.widget.Toast
 import com.example.myapplication.MyApplication
 import com.example.myapplication.R
 import com.example.myapplication.ui.login.LoginActivity
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
@@ -35,21 +37,38 @@ class InventoryAppWidget : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        // Manejo de la acción toggle
+        // --- COMIENZO DEL CAMBIO: CRITERIO 7 ---
+        // Se maneja la acción de clic en el ícono del ojo para mostrar u ocultar el saldo.
         if (intent.action == TOGGLE_BALANCE_ACTION) {
             val appWidgetId = intent.getIntExtra(
                 AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID
             )
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                val prefs = context.getSharedPreferences(PREFS_NAME, 0)
-                val isVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
-                prefs.edit().putBoolean(PREF_PREFIX_KEY + appWidgetId, !isVisible).apply()
+                // Se obtiene una instancia de FirebaseAuth para verificar si el usuario está autenticado.
+                val auth = FirebaseAuth.getInstance()
 
-                // Actualizar el widget después de cambiar la preferencia
-                updateAppWidget(context, AppWidgetManager.getInstance(context), appWidgetId)
+                // Criterio 7: Se valida que el usuario esté logueado.
+                if (auth.currentUser != null) {
+                    // Si el usuario está logueado, se alterna la visibilidad del saldo.
+                    val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+                    val isVisible = prefs.getBoolean(PREF_PREFIX_KEY + appWidgetId, false)
+                    prefs.edit().putBoolean(PREF_PREFIX_KEY + appWidgetId, !isVisible).apply()
+
+                    // Se actualiza el widget para que refleje el cambio de visibilidad.
+                    updateAppWidget(context, AppWidgetManager.getInstance(context), appWidgetId)
+                } else {
+                    // Si el usuario no está logueado, se muestra un mensaje y se le redirige a la pantalla de login.
+                    Toast.makeText(context, "Inicie sesión para ver el saldo", Toast.LENGTH_SHORT).show()
+                    val loginIntent = Intent(context, LoginActivity::class.java).apply {
+                        // Se agregan flags para que la pantalla de login sea una nueva tarea y limpie las anteriores.
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    context.startActivity(loginIntent)
+                }
             }
         }
+        // --- FIN DEL CAMBIO ---
         super.onReceive(context, intent)
     }
 
@@ -68,8 +87,11 @@ class InventoryAppWidget : AppWidgetProvider() {
 
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                // Obtener información de la base de datos
-                val products = application.repository.allProducts.first()
+                // --- COMIENZO DEL CAMBIO: CORRECCIÓN DE ACCESO A DATOS ---
+                // Se obtiene la instancia de la base de datos desde la clase Application
+                // y se accede al DAO para obtener los productos.
+                val products = application.database.productDao().getAllProducts().first()
+                // --- FIN DEL CAMBIO ---
                 val totalBalance = products.sumOf { it.precio * it.cantidad }
                 val formattedBalance = formatBalance(totalBalance)
 
@@ -122,9 +144,9 @@ class InventoryAppWidget : AppWidgetProvider() {
             appWidgetId,
             toggleIntent,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             } else {
-                0
+                PendingIntent.FLAG_UPDATE_CURRENT
             }
         )
         views.setOnClickPendingIntent(R.id.ivEye, togglePendingIntent)
@@ -141,7 +163,7 @@ class InventoryAppWidget : AppWidgetProvider() {
             loginRequestCode,
             loginIntent,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             } else {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
