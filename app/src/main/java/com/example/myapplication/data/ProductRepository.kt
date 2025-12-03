@@ -15,8 +15,8 @@ class ProductRepository(private val productDao: ProductDao) {
         productDao.insertProduct(product.toEntity())
     }
 
-    fun getProductById(id: String): Flow<Product> {
-        return productDao.getProductById(id).map { it.toDomain() }
+    fun getProductById(id: String): Flow<Product?> {
+        return productDao.getProductById(id).map { it?.toDomain() }
     }
 
     suspend fun update(product: Product) {
