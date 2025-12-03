@@ -17,6 +17,8 @@ import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentHomeBinding
 import com.example.myapplication.ui.ViewModelFactory
 import com.example.myapplication.ui.login.LoginActivity
+import com.google.firebase.auth.FirebaseAuth
+import androidx.navigation.NavOptions
 
 class HomeFragment : Fragment() {
 
@@ -62,21 +64,24 @@ class HomeFragment : Fragment() {
         binding.toolbarHome.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_logout -> {
-                    // 🔒 Cerrar sesión y borrar SharedPreferences
-                    val sharedPref = requireActivity().getSharedPreferences(
-                        "UserSession",
-                        AppCompatActivity.MODE_PRIVATE
-                    )
-                    val editor = sharedPref.edit()
-                    editor.clear() // Borra la sesión guardada
-                    editor.apply()
+                    // 1. Cerrar la sesión de Firebase, que es lo más importante.
+                    FirebaseAuth.getInstance().signOut()
 
-                    Toast.makeText(requireContext(), "Cerrando sesión...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Has cerrado sesión", Toast.LENGTH_SHORT).show()
 
-                    // 🔁 Volver al Login y limpiar historial
+                    // 2. Crear un Intent para volver a LoginActivity.
                     val intent = Intent(requireContext(), LoginActivity::class.java)
+
+                    // 3. Añadir flags para limpiar el historial de navegación.
+                    //    - FLAG_ACTIVITY_NEW_TASK: Inicia la actividad en una nueva tarea.
+                    //    - FLAG_ACTIVITY_CLEAR_TASK: Borra todas las actividades de la tarea antes de iniciar la nueva.
+                    //    Esto asegura que el usuario no pueda volver al HomeFragment con el botón "Atrás".
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+                    // 4. Iniciar la actividad y cerrar la actual.
                     startActivity(intent)
+                    requireActivity().finish() 
+
                     true
                 }
 
